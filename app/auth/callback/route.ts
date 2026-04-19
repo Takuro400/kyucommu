@@ -20,7 +20,7 @@ export async function GET(request: Request) {
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet) {
+          setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
             // NextResponseに直接セットするため一時保存
             pendingCookies.push(...cookiesToSet);
           },
