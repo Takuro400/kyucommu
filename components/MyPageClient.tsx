@@ -15,15 +15,28 @@ const MENU_ITEMS = [
 
 export default function MyPageClient() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profileName, setProfileName] = useState<string | null>(null);
   const [loading, setLoading] = useState(!DEMO_MODE);
 
   useEffect(() => {
     if (DEMO_MODE) return;
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
+
+    async function loadUser() {
+      const { data } = await supabase.auth.getUser();
       setUser(data.user);
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("display_name")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+        setProfileName(profile?.display_name ?? null);
+      }
       setLoading(false);
-    });
+    }
+    loadUser();
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -68,7 +81,7 @@ export default function MyPageClient() {
   }
 
   const displayEmail = DEMO_MODE ? "demo@mail.kyutech.ac.jp" : (user?.email ?? "");
-  const displayName = displayEmail.split("@")[0];
+  const displayName = profileName ?? displayEmail.split("@")[0];
 
   return (
     <main className="px-4 py-5">

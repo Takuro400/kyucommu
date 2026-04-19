@@ -27,7 +27,20 @@ export async function GET(request: Request) {
         },
       }
     );
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data } = await supabase.auth.exchangeCodeForSession(code);
+
+    // 初回ログインかどうか判定：profiles テーブルにレコードがなければオンボーディングへ
+    if (data.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", data.user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        return NextResponse.redirect(`${origin}/onboarding`);
+      }
+    }
   }
 
   return NextResponse.redirect(`${origin}/`);

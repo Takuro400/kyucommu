@@ -68,6 +68,19 @@ create policy "events_insert" on events for insert with check (true);
 create policy "likes_insert" on likes for insert with check (true);
 create policy "likes_delete" on likes for delete using (true);
 
+-- プロフィールテーブル（表示名）
+create table if not exists profiles (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade unique,
+  display_name text not null,
+  created_at timestamptz default now()
+);
+
+alter table profiles enable row level security;
+create policy "profiles_read"   on profiles for select using (true);
+create policy "profiles_insert" on profiles for insert with check (auth.uid() = user_id);
+create policy "profiles_update" on profiles for update using (auth.uid() = user_id);
+
 -- サンプルデータ投入
 insert into circles (name, emoji, category, frequency, monthly_fee, beginner_ok, description, member_count, contact_handle) values
   ('ロボット研究会', '🤖', 'tech', '週2〜3回', 1000, true, '九工大の技術を活かしてロボットを自作！競技大会にも出場。プログラミング未経験でも大歓迎。', 28, 'robotics_kyutech'),
