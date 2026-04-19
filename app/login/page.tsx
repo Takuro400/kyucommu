@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient, supabaseConfigured } from "@/lib/supabase";
 import { Mail, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 
-const ALLOWED_DOMAIN = "@mail.kyutech.ac.jp";
+const ALLOWED_DOMAIN = "@mail.kyutech.jp";
 const DEMO_MODE = !supabaseConfigured;
 
 export default function LoginPage() {
@@ -17,7 +17,7 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValidEmail) {
-      setErrorMsg(`@mail.kyutech.ac.jp のメールアドレスのみ登録できます`);
+      setErrorMsg(`@mail.kyutech.jp のメールアドレスのみ登録できます`);
       setStatus("error");
       return;
     }
@@ -114,7 +114,7 @@ export default function LoginPage() {
                 type="email"
                 inputMode="email"
                 autoComplete="email"
-                placeholder="s00000@mail.kyutech.ac.jp"
+                placeholder="s00000@mail.kyutech.jp"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -135,7 +135,7 @@ export default function LoginPage() {
 
           {!isValidEmail && email.length > 0 && status !== "error" && (
             <p className="text-xs text-amber-600">
-              ※ @mail.kyutech.ac.jp のアドレスのみ利用できます
+              ※ @mail.kyutech.jp のアドレスのみ利用できます
             </p>
           )}
 
