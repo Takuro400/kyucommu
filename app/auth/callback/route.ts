@@ -8,6 +8,10 @@ export async function GET(request: Request) {
 
   if (code) {
     const cookieStore = cookies();
+
+    // Supabaseが設定したいCookieを一時保存するリスト
+    const pendingCookies: { name: string; value: string; options?: Record<string, unknown> }[] = [];
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -16,20 +20,19 @@ export async function GET(request: Request) {
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                cookieStore.set(name, value, options as any)
-              );
-            } catch {}
+          setAll(cookiesToSet) {
+            // NextResponseに直接セットするため一時保存
+            pendingCookies.push(...cookiesToSet);
           },
         },
       }
     );
+
     const { data } = await supabase.auth.exchangeCodeForSession(code);
 
-    // 初回ログインかどうか判定：profiles テーブルにレコードがなければオンボーディングへ
+    // リダイレクト先を決める
+    let redirectTo = `${origin}/`;
+
     if (data.user) {
       const { data: profile } = await supabase
         .from("profiles")
@@ -38,10 +41,18 @@ export async function GET(request: Request) {
         .maybeSingle();
 
       if (!profile) {
-        return NextResponse.redirect(`${origin}/onboarding`);
+        redirectTo = `${origin}/onboarding`;
       }
     }
+
+    // NextResponseを作ってからCookieをセット（これが重要！）
+    const response = NextResponse.redirect(redirectTo);
+    pendingCookies.forEach(({ name, value, options }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      response.cookies.set(name, value, options as any);
+    });
+    return response;
   }
 
-  return NextResponse.redirect(`${origin}/`);
+  return NextResponse.redirect(`${origin}/login`);
 }
