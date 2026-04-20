@@ -80,15 +80,12 @@ export default function MyPageClient() {
     const supabase = createClient();
     const { error } = await supabase
       .from("profiles")
-      .upsert(
-        {
-          user_id: user.id,
-          grade: grade || null,
-          faculty: faculty || null,
-          department: department || null,
-        },
-        { onConflict: "user_id" }
-      );
+      .update({
+        grade: grade || null,
+        faculty: faculty || null,
+        department: department || null,
+      })
+      .eq("user_id", user.id);
     setSaving(false);
     if (error) {
       console.error("プロフィール保存エラー:", error.message, error.code);
