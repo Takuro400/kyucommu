@@ -12,15 +12,20 @@ import { Circle } from "@/lib/types";
 
 const DEMO_MODE = !supabaseConfigured;
 
+const GRADES = ["1年生", "2年生", "3年生", "4年生", "大学院生"];
+
 const FACULTY_DEPARTMENTS: Record<string, string[]> = {
   "工学部": ["建設社会類", "機械類", "電気類", "物質理工学類", "総合類"],
   "情報工学部": ["知能情報類", "電子情報通信類", "知的システム類", "生命情報類"],
 };
 
+const UPPER_DEPARTMENTS = ["Ⅰ類", "Ⅱ類", "Ⅲ類", "Ⅳ類", "Ⅴ類"];
+
 export default function MyPageClient() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [profileName, setProfileName] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [grade, setGrade] = useState<string>("");
   const [faculty, setFaculty] = useState<string>("");
   const [department, setDepartment] = useState<string>("");
   const [saving, setSaving] = useState(false);
@@ -38,11 +43,12 @@ export default function MyPageClient() {
       if (data.user) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("display_name, avatar_url, faculty, department")
+          .select("display_name, avatar_url, grade, faculty, department")
           .eq("user_id", data.user.id)
           .maybeSingle();
         setProfileName(profile?.display_name ?? null);
         setAvatarUrl(profile?.avatar_url ?? null);
+        setGrade(profile?.grade ?? "");
         setFaculty(profile?.faculty ?? "");
         setDepartment(profile?.department ?? "");
       }
@@ -56,6 +62,12 @@ export default function MyPageClient() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  function handleGradeChange(val: string) {
+    setGrade(val);
+    setFaculty("");
+    setDepartment("");
+  }
+
   function handleFacultyChange(val: string) {
     setFaculty(val);
     setDepartment("");
@@ -68,7 +80,11 @@ export default function MyPageClient() {
     const supabase = createClient();
     const { error } = await supabase
       .from("profiles")
-      .update({ faculty: faculty || null, department: department || null })
+      .update({
+        grade: grade || null,
+        faculty: faculty || null,
+        department: department || null,
+      })
       .eq("user_id", user.id);
     setSaving(false);
     setSaveMsg(error ? "保存に失敗しました" : "保存しました！");
@@ -118,7 +134,10 @@ export default function MyPageClient() {
 
   const displayEmail = DEMO_MODE ? "demo@mail.kyutech.jp" : (user?.email ?? "");
   const displayName = profileName ?? displayEmail.split("@")[0];
-  const departments = faculty ? FACULTY_DEPARTMENTS[faculty] ?? [] : [];
+  const firstYear = grade === "1年生";
+  const deptOptions = firstYear
+    ? (faculty ? FACULTY_DEPARTMENTS[faculty] ?? [] : [])
+    : UPPER_DEPARTMENTS;
 
   return (
     <main className="px-4 py-5">
@@ -143,13 +162,23 @@ export default function MyPageClient() {
           <div className="flex-1 min-w-0">
             <p className="text-base font-bold text-gray-900 truncate">{displayName}</p>
             <p className="text-xs text-gray-400 truncate mt-0.5">{displayEmail}</p>
-            <div className="flex items-center gap-1 mt-1.5">
+            <div className="flex items-center gap-1 mt-1.5 flex-wrap">
               <span
                 className="text-[10px] px-2 py-0.5 rounded-full font-medium"
                 style={{ background: "#E6F1FB", color: "#185FA5" }}
               >
                 九工大生
               </span>
+              {grade && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                  {grade}
+                </span>
+              )}
+              {department && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                  {department}
+                </span>
+              )}
               {DEMO_MODE && (
                 <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-50 text-amber-600">
                   デモ
@@ -159,39 +188,60 @@ export default function MyPageClient() {
           </div>
         </div>
 
-        {/* 学部・類の選択 */}
+        {/* 学年・学部・類の選択 */}
         <div className="border-t border-gray-100 pt-4 flex flex-col gap-3">
-          {/* 学部 */}
+
+          {/* 学年 */}
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">学部</label>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">学年</label>
             <select
-              value={faculty}
-              onChange={(e) => handleFacultyChange(e.target.value)}
+              value={grade}
+              onChange={(e) => handleGradeChange(e.target.value)}
               disabled={DEMO_MODE}
               className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5]"
             >
               <option value="">未設定</option>
-              {Object.keys(FACULTY_DEPARTMENTS).map((f) => (
-                <option key={f} value={f}>{f}</option>
+              {GRADES.map((g) => (
+                <option key={g} value={g}>{g}</option>
               ))}
             </select>
           </div>
 
-          {/* 類 */}
-          <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">類</label>
-            <select
-              value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              disabled={!faculty || DEMO_MODE}
-              className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5] disabled:opacity-40"
-            >
-              <option value="">未設定</option>
-              {departments.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-          </div>
+          {/* 学部（1年生のみ表示） */}
+          {firstYear && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">学部</label>
+              <select
+                value={faculty}
+                onChange={(e) => handleFacultyChange(e.target.value)}
+                disabled={DEMO_MODE}
+                className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5]"
+              >
+                <option value="">未設定</option>
+                {Object.keys(FACULTY_DEPARTMENTS).map((f) => (
+                  <option key={f} value={f}>{f}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* 類（学年が選ばれていれば表示） */}
+          {grade && (
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">類</label>
+              <select
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                disabled={(firstYear && !faculty) || DEMO_MODE}
+                className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5] disabled:opacity-40"
+              >
+                <option value="">未設定</option>
+                {deptOptions.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* 保存ボタン */}
           {user && !DEMO_MODE && (
