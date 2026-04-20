@@ -94,6 +94,18 @@ create policy "profiles_read"   on profiles for select using (true);
 create policy "profiles_insert" on profiles for insert with check (auth.uid() = user_id);
 create policy "profiles_update" on profiles for update using (auth.uid() = user_id);
 
+-- circlesテーブルに列を追加（登録者・活動場所・SNS）
+alter table circles add column if not exists created_by uuid references auth.users(id);
+alter table circles add column if not exists location text not null default '';
+alter table circles add column if not exists sns_url text default '';
+
+-- 登録者だけが編集・削除できるRLS
+create policy "circles_update" on circles for update using (auth.uid() = created_by);
+create policy "circles_delete" on circles for delete using (auth.uid() = created_by);
+
+-- profilesテーブルにアバターURLを追加
+alter table profiles add column if not exists avatar_url text;
+
 -- サンプルデータ投入
 insert into circles (name, emoji, category, frequency, monthly_fee, beginner_ok, description, member_count, contact_handle) values
   ('ロボット研究会', '🤖', 'tech', '週2〜3回', 1000, true, '九工大の技術を活かしてロボットを自作！競技大会にも出場。プログラミング未経験でも大歓迎。', 28, 'robotics_kyutech'),

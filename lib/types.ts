@@ -11,6 +11,9 @@ export interface Circle {
   description: string;
   member_count: number;
   contact_handle: string;
+  location?: string;
+  sns_url?: string;
+  created_by?: string;
   created_at: string;
 }
 
