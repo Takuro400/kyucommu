@@ -13,7 +13,9 @@ export function createClient() {
     // Return a dummy client object in demo mode — operations will be no-ops
     return null as unknown as ReturnType<typeof createBrowserClient>;
   }
-  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { flowType: "implicit" },
+  });
 }
 
 export { isConfigured as supabaseConfigured };

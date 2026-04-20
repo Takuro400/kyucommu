@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient, supabaseConfigured } from "@/lib/supabase";
 import { Mail, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
 
-const ALLOWED_DOMAIN = "@mail.kyutech.jp";
+const ALLOWED_DOMAINS = ["@mail.kyutech.jp", "@gmail.com"];
 const DEMO_MODE = !supabaseConfigured;
 
 export default function LoginPage() {
@@ -12,12 +12,14 @@ export default function LoginPage() {
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  const isValidEmail = email.toLowerCase().endsWith(ALLOWED_DOMAIN);
+  const lower = email.toLowerCase();
+  const isValidEmail = ALLOWED_DOMAINS.some((d) => lower.endsWith(d));
+  const isGmail = lower.endsWith("@gmail.com");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!isValidEmail) {
-      setErrorMsg(`@mail.kyutech.jp のメールアドレスのみ登録できます`);
+      setErrorMsg("@mail.kyutech.jp のメールアドレスのみ登録できます");
       setStatus("error");
       return;
     }
@@ -26,7 +28,6 @@ export default function LoginPage() {
     setErrorMsg("");
 
     if (DEMO_MODE) {
-      // Demo mode: simulate success
       await new Promise((r) => setTimeout(r, 800));
       setStatus("sent");
       return;
@@ -42,7 +43,14 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setErrorMsg("メール送信に失敗しました。しばらく経ってから再試行してください。");
+      // エラーの種類に応じたメッセージ
+      if (error.message.includes("rate limit") || error.status === 429) {
+        setErrorMsg("送信が多すぎます。数分待ってから再試行してください。");
+      } else if (error.message.includes("invalid") || error.status === 400) {
+        setErrorMsg("メールアドレスの形式が正しくありません。");
+      } else {
+        setErrorMsg(`送信エラー: ${error.message}`);
+      }
       setStatus("error");
     } else {
       setStatus("sent");
@@ -136,6 +144,11 @@ export default function LoginPage() {
           {!isValidEmail && email.length > 0 && status !== "error" && (
             <p className="text-xs text-amber-600">
               ※ @mail.kyutech.jp のアドレスのみ利用できます
+            </p>
+          )}
+          {isGmail && status !== "error" && (
+            <p className="text-xs text-blue-500">
+              ※ Gmailはテスト用です
             </p>
           )}
 
