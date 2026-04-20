@@ -106,6 +106,11 @@ create policy "circles_delete" on circles for delete using (auth.uid() = created
 -- profilesテーブルにアバターURLを追加
 alter table profiles add column if not exists avatar_url text;
 
+-- profilesテーブルに学年・学部・類を追加
+alter table profiles add column if not exists grade text;
+alter table profiles add column if not exists faculty text;
+alter table profiles add column if not exists department text;
+
 -- サークルブックマークテーブル
 create table if not exists circle_bookmarks (
   id uuid default gen_random_uuid() primary key,

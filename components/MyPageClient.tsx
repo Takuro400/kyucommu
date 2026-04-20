@@ -80,15 +80,23 @@ export default function MyPageClient() {
     const supabase = createClient();
     const { error } = await supabase
       .from("profiles")
-      .update({
-        grade: grade || null,
-        faculty: faculty || null,
-        department: department || null,
-      })
-      .eq("user_id", user.id);
+      .upsert(
+        {
+          user_id: user.id,
+          grade: grade || null,
+          faculty: faculty || null,
+          department: department || null,
+        },
+        { onConflict: "user_id" }
+      );
     setSaving(false);
-    setSaveMsg(error ? "保存に失敗しました" : "保存しました！");
-    setTimeout(() => setSaveMsg(null), 2000);
+    if (error) {
+      console.error("プロフィール保存エラー:", error.message, error.code);
+      setSaveMsg(`失敗: ${error.message}`);
+    } else {
+      setSaveMsg("保存しました！");
+    }
+    setTimeout(() => setSaveMsg(null), 3000);
   }
 
   async function handleLogout() {
