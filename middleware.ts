@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
   try {
     let supabaseResponse = NextResponse.next({ request });
 
+    // Cookieのリフレッシュのみ行う（ページリダイレクトはしない）
     const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       cookies: {
         getAll() {
@@ -35,25 +36,11 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    const { pathname } = request.nextUrl;
-    const isPublicPath =
-      pathname.startsWith("/login") ||
-      pathname.startsWith("/auth") ||
-      pathname.startsWith("/onboarding");
-
-    if (!user && !isPublicPath) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
-    }
+    // セッションのCookieをリフレッシュするだけ（強制リダイレクトなし）
+    await supabase.auth.getUser();
 
     return supabaseResponse;
   } catch {
-    // エラー時はそのまま通す
     return NextResponse.next({ request });
   }
 }
