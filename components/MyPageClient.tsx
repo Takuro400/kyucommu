@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient, supabaseConfigured } from "@/lib/supabase";
-import { Bookmark, LogOut, LogIn, PlusCircle, Users, Save } from "lucide-react";
+import { Bookmark, LogOut, LogIn, PlusCircle, Users, Save, Pencil, X, Check } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import Link from "next/link";
 import BookmarkedCirclesClient from "./BookmarkedCirclesClient";
@@ -32,6 +32,10 @@ export default function MyPageClient() {
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(!DEMO_MODE);
   const [showRegister, setShowRegister] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameMsg, setNameMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (DEMO_MODE) return;
@@ -61,6 +65,39 @@ export default function MyPageClient() {
     });
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  function startEditName(current: string) {
+    setNameInput(current);
+    setEditingName(true);
+    setNameMsg(null);
+  }
+
+  function cancelEditName() {
+    setEditingName(false);
+    setNameMsg(null);
+  }
+
+  async function saveDisplayName() {
+    const trimmed = nameInput.trim();
+    if (!trimmed) { setNameMsg("ニックネームを入力してください"); return; }
+    if (trimmed.length > 20) { setNameMsg("20文字以内で入力してください"); return; }
+    if (!user || DEMO_MODE) return;
+    setNameSaving(true);
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("profiles")
+      .update({ display_name: trimmed })
+      .eq("user_id", user.id);
+    setNameSaving(false);
+    if (error) {
+      setNameMsg("保存に失敗しました");
+    } else {
+      setProfileName(trimmed);
+      setEditingName(false);
+      setNameMsg("保存しました");
+      setTimeout(() => setNameMsg(null), 2000);
+    }
+  }
 
   function handleGradeChange(val: string) {
     setGrade(val);
@@ -165,31 +202,80 @@ export default function MyPageClient() {
           )}
 
           <div className="flex-1 min-w-0">
-            <p className="text-base font-bold text-gray-900 truncate">{displayName}</p>
-            <p className="text-xs text-gray-400 truncate mt-0.5">{displayEmail}</p>
-            <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-              <span
-                className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                style={{ background: "#E6F1FB", color: "#185FA5" }}
-              >
-                九工大生
-              </span>
-              {grade && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
-                  {grade}
-                </span>
-              )}
-              {department && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
-                  {department}
-                </span>
-              )}
-              {DEMO_MODE && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-50 text-amber-600">
-                  デモ
-                </span>
-              )}
-            </div>
+            {editingName ? (
+              <div className="flex flex-col gap-1.5">
+                <input
+                  type="text"
+                  value={nameInput}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  maxLength={20}
+                  autoFocus
+                  className="text-sm font-bold border border-[#185FA5] rounded-lg px-2 py-1 w-full focus:outline-none"
+                />
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={saveDisplayName}
+                    disabled={nameSaving}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full text-white font-medium"
+                    style={{ background: "#185FA5" }}
+                  >
+                    <Check size={11} />
+                    {nameSaving ? "保存中..." : "保存"}
+                  </button>
+                  <button
+                    onClick={cancelEditName}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium"
+                  >
+                    <X size={11} />
+                    キャンセル
+                  </button>
+                </div>
+                {nameMsg && (
+                  <p className="text-[10px] text-red-500">{nameMsg}</p>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-base font-bold text-gray-900 truncate">{displayName}</p>
+                  {user && !DEMO_MODE && (
+                    <button
+                      onClick={() => startEditName(displayName)}
+                      className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 text-gray-400"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                  )}
+                </div>
+                {nameMsg && (
+                  <p className="text-[10px] text-green-600 mt-0.5">{nameMsg}</p>
+                )}
+                <p className="text-xs text-gray-400 truncate mt-0.5">{displayEmail}</p>
+                <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: "#E6F1FB", color: "#185FA5" }}
+                  >
+                    九工大生
+                  </span>
+                  {grade && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                      {grade}
+                    </span>
+                  )}
+                  {department && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                      {department}
+                    </span>
+                  )}
+                  {DEMO_MODE && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-50 text-amber-600">
+                      デモ
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
