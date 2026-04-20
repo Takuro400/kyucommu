@@ -13,6 +13,10 @@ export interface Circle {
   contact_handle: string;
   location?: string;
   sns_url?: string;
+  icon_url?: string;
+  instagram_url?: string;
+  twitter_url?: string;
+  line_url?: string;
   created_by?: string;
   created_at: string;
 }

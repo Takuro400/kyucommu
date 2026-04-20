@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import CircleCard from "@/components/CircleCard";
 import { MOCK_CIRCLES } from "@/lib/mockData";
 import { CATEGORY_MAP } from "@/lib/utils";
-import { Category } from "@/lib/types";
+import { Category, Circle } from "@/lib/types";
+import { createClient, supabaseConfigured } from "@/lib/supabase";
 
 const CATS: { key: Category | "beginner"; label: string; emoji: string }[] = [
   { key: "tech",     label: "技術系",    emoji: "💻" },
@@ -18,18 +19,29 @@ const CATS: { key: Category | "beginner"; label: string; emoji: string }[] = [
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [circles, setCircles] = useState<Circle[]>(MOCK_CIRCLES);
 
-  const filtered = MOCK_CIRCLES.filter((c) => {
+  useEffect(() => {
+    if (!supabaseConfigured) return;
+    const supabase = createClient();
+    supabase
+      .from("circles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data && data.length > 0) setCircles(data as Circle[]);
+      });
+  }, []);
+
+  const filtered = circles.filter((c) => {
     const matchQuery =
       !query ||
       c.name.includes(query) ||
       c.description.includes(query) ||
       CATEGORY_MAP[c.category].label.includes(query);
-
     const matchFilter =
       !activeFilter ||
       (activeFilter === "beginner" ? c.beginner_ok : c.category === activeFilter);
-
     return matchQuery && matchFilter;
   });
 
@@ -49,7 +61,6 @@ export default function SearchPage() {
       </header>
 
       <main className="px-4 pt-4">
-        {/* カテゴリグリッド */}
         {!query && (
           <div className="grid grid-cols-2 gap-3 mb-6">
             {CATS.map((cat) => {
@@ -62,10 +73,7 @@ export default function SearchPage() {
                   key={cat.key}
                   onClick={() => setActiveFilter(isActive ? null : cat.key)}
                   className="flex items-center gap-3 rounded-xl p-4 transition-opacity active:opacity-70"
-                  style={{
-                    background: isActive ? color.text : color.bg,
-                    color: isActive ? "#fff" : color.text,
-                  }}
+                  style={{ background: isActive ? color.text : color.bg, color: isActive ? "#fff" : color.text }}
                 >
                   <span className="text-3xl">{cat.emoji}</span>
                   <span className="text-sm font-medium">{cat.label}</span>
@@ -75,7 +83,6 @@ export default function SearchPage() {
           </div>
         )}
 
-        {/* サークル一覧 */}
         <p className="text-xs text-gray-400 mb-2">
           {activeFilter
             ? `${CATS.find((c) => c.key === activeFilter)?.label} (${filtered.length}件)`
@@ -86,8 +93,7 @@ export default function SearchPage() {
         <div className="flex flex-col gap-2">
           {filtered.length > 0
             ? filtered.map((c) => <CircleCard key={c.id} circle={c} />)
-            : <p className="text-center text-gray-400 text-sm py-12">該当するサークルが見つかりませんでした</p>
-          }
+            : <p className="text-center text-gray-400 text-sm py-12">該当するサークルが見つかりませんでした</p>}
         </div>
       </main>
 

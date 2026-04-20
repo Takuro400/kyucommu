@@ -111,6 +111,18 @@ alter table profiles add column if not exists grade text;
 alter table profiles add column if not exists faculty text;
 alter table profiles add column if not exists department text;
 
+-- circlesテーブルにSNS・アイコンカラムを追加
+alter table circles add column if not exists icon_url text;
+alter table circles add column if not exists instagram_url text;
+alter table circles add column if not exists twitter_url text;
+alter table circles add column if not exists line_url text;
+
+-- circle-iconsストレージバケット用ポリシー（SQL Editorで実行）
+-- ※バケットはSupabase StorageのUIから「circle-icons」をpublicで作成してください
+-- insert into storage.buckets (id, name, public) values ('circle-icons', 'circle-icons', true) on conflict do nothing;
+-- create policy "circle_icons_upload" on storage.objects for insert with check (bucket_id = 'circle-icons' and auth.role() = 'authenticated');
+-- create policy "circle_icons_read" on storage.objects for select using (bucket_id = 'circle-icons');
+
 -- サークルブックマークテーブル
 create table if not exists circle_bookmarks (
   id uuid default gen_random_uuid() primary key,

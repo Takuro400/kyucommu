@@ -15,10 +15,12 @@ export default function CircleCard({ circle, showBookmark = true }: Props) {
     <div className="bg-white rounded-xl flex items-center active:opacity-70 transition-opacity overflow-hidden">
       <Link href={`/circle/${circle.id}`} className="flex items-center gap-3 flex-1 min-w-0 p-4">
         <div
-          className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
+          className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden"
           style={{ background: cat.bg }}
         >
-          {circle.emoji}
+          {circle.icon_url
+            ? <img src={circle.icon_url} alt={circle.name} className="w-full h-full object-cover" />
+            : circle.emoji}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">{circle.name}</p>

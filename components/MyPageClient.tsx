@@ -8,6 +8,7 @@ import Link from "next/link";
 import BookmarkedCirclesClient from "./BookmarkedCirclesClient";
 import RegisterCircleModal from "./RegisterCircleModal";
 import AvatarUpload from "./AvatarUpload";
+import MyCirclesClient from "./MyCirclesClient";
 import { Circle } from "@/lib/types";
 
 const DEMO_MODE = !supabaseConfigured;
@@ -32,6 +33,7 @@ export default function MyPageClient() {
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(!DEMO_MODE);
   const [showRegister, setShowRegister] = useState(false);
+  const [circleRefresh, setCircleRefresh] = useState(0);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [nameSaving, setNameSaving] = useState(false);
@@ -142,6 +144,7 @@ export default function MyPageClient() {
 
   function handleCircleRegistered(circle: Circle) {
     console.log("新規サークル登録:", circle.name);
+    setCircleRefresh((n) => n + 1);
   }
 
   if (loading) {
@@ -348,6 +351,29 @@ export default function MyPageClient() {
           )}
         </div>
       </div>
+
+      {/* 自分のサークル */}
+      {user && (
+        <div className="mb-4">
+          <div className="flex items-center justify-between px-1 mb-2">
+            <div className="flex items-center gap-2">
+              <Users size={15} style={{ color: "#185FA5" }} />
+              <p className="text-sm font-bold text-gray-800">自分のサークル</p>
+            </div>
+            <button
+              onClick={() => setShowRegister(true)}
+              className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full"
+              style={{ background: "#E6F1FB", color: "#185FA5" }}
+            >
+              <PlusCircle size={13} />
+              登録する
+            </button>
+          </div>
+          <div className="bg-white rounded-2xl px-3 py-3">
+            <MyCirclesClient userId={user.id} refresh={circleRefresh} />
+          </div>
+        </div>
+      )}
 
       {/* ブックマークしたサークル */}
       <div className="mb-4">
