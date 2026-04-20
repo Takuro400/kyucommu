@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { createClient, supabaseConfigured } from "@/lib/supabase";
-import { Bell, ChevronRight, LogOut, LogIn, PlusCircle, Bookmark, Users } from "lucide-react";
+import { Bookmark, LogOut, LogIn, PlusCircle, Users } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import Link from "next/link";
-import BookmarkedPostsClient from "./BookmarkedPostsClient";
+import BookmarkedCirclesClient from "./BookmarkedCirclesClient";
 import RegisterCircleModal from "./RegisterCircleModal";
 import AvatarUpload from "./AvatarUpload";
-import MyCirclesClient from "./MyCirclesClient";
 import { Circle } from "@/lib/types";
 
 const DEMO_MODE = !supabaseConfigured;
@@ -19,7 +18,6 @@ export default function MyPageClient() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(!DEMO_MODE);
   const [showRegister, setShowRegister] = useState(false);
-  const [circleRefresh, setCircleRefresh] = useState(0);
 
   useEffect(() => {
     if (DEMO_MODE) return;
@@ -55,7 +53,6 @@ export default function MyPageClient() {
   }
 
   function handleCircleRegistered(circle: Circle) {
-    setCircleRefresh((n) => n + 1);
     console.log("新規サークル登録:", circle.name);
   }
 
@@ -89,14 +86,13 @@ export default function MyPageClient() {
     );
   }
 
-  const displayEmail = DEMO_MODE ? "demo@mail.kyutech.ac.jp" : (user?.email ?? "");
+  const displayEmail = DEMO_MODE ? "demo@mail.kyutech.jp" : (user?.email ?? "");
   const displayName = profileName ?? displayEmail.split("@")[0];
 
   return (
     <main className="px-4 py-5">
       {/* プロフィールカード */}
       <div className="bg-white rounded-2xl p-5 flex items-center gap-4 mb-4">
-        {/* アバター（タップで写真変更） */}
         {user && !DEMO_MODE ? (
           <AvatarUpload
             userId={user.id}
@@ -131,72 +127,60 @@ export default function MyPageClient() {
         </div>
       </div>
 
-      {/* 自分のサークル */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between px-1 mb-2">
-          <div className="flex items-center gap-2">
-            <Users size={15} style={{ color: "#185FA5" }} />
-            <p className="text-sm font-bold text-gray-800">自分のサークル</p>
-          </div>
-          {(user || DEMO_MODE) && (
-            <button
-              onClick={() => setShowRegister(true)}
-              className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full"
-              style={{ background: "#E6F1FB", color: "#185FA5" }}
-            >
-              <PlusCircle size={13} />
-              登録する
-            </button>
-          )}
-        </div>
-        <div className="bg-white rounded-2xl px-3 py-3">
-          {user ? (
-            <MyCirclesClient userId={user.id} refresh={circleRefresh} />
-          ) : (
-            <p className="text-xs text-gray-400 text-center py-3">
-              ログインするとサークルを登録できます
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* 保存した投稿 */}
+      {/* ブックマークしたサークル */}
       <div className="mb-4">
         <div className="flex items-center gap-2 px-1 mb-2">
           <Bookmark size={15} style={{ color: "#185FA5" }} />
-          <p className="text-sm font-bold text-gray-800">保存した投稿</p>
+          <p className="text-sm font-bold text-gray-800">ブックマーク中のサークル</p>
         </div>
-        {user ? (
-          <BookmarkedPostsClient userId={user.id} />
+        {user || DEMO_MODE ? (
+          <BookmarkedCirclesClient userId={user?.id ?? "demo"} />
         ) : (
           <div className="bg-white rounded-2xl px-4 py-5 text-center">
-            <p className="text-xs text-gray-400">ログインすると保存した投稿が表示されます</p>
+            <p className="text-xs text-gray-400">ログインするとブックマークが表示されます</p>
           </div>
         )}
       </div>
 
-      {/* メニュー */}
-      <div className="bg-white rounded-2xl overflow-hidden mb-4">
-        <button className="w-full flex items-center gap-3 px-4 py-4 active:bg-gray-50">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ background: "#E6F1FB" }}
-          >
-            <Bell size={16} style={{ color: "#185FA5" }} />
+      {/* サークル登録 */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between px-1 mb-2">
+          <div className="flex items-center gap-2">
+            <Users size={15} style={{ color: "#185FA5" }} />
+            <p className="text-sm font-bold text-gray-800">サークル登録</p>
           </div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-medium text-gray-800">通知設定</p>
-            <p className="text-xs text-gray-400">新着情報のお知らせ</p>
-          </div>
-          <ChevronRight size={16} className="text-gray-300" />
-        </button>
+        </div>
+        <div className="bg-white rounded-2xl p-4">
+          <p className="text-xs text-gray-500 mb-3">
+            あなたのサークル・部活をキューコミュに登録して、新入生にアピールしよう！
+          </p>
+          {(user || DEMO_MODE) ? (
+            <button
+              onClick={() => setShowRegister(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium text-sm"
+              style={{ background: "#185FA5" }}
+            >
+              <PlusCircle size={15} />
+              サークルを登録する
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm"
+              style={{ background: "#E6F1FB", color: "#185FA5" }}
+            >
+              <LogIn size={15} />
+              ログインして登録する
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* ログアウト */}
-      {!DEMO_MODE && (
+      {!DEMO_MODE && user && (
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-4 bg-white rounded-2xl active:bg-gray-50 text-red-400"
+          className="w-full flex items-center gap-3 px-4 py-4 bg-white rounded-2xl active:bg-gray-50 text-red-400 mb-4"
         >
           <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
             <LogOut size={16} className="text-red-400" />
@@ -205,7 +189,7 @@ export default function MyPageClient() {
         </button>
       )}
 
-      <p className="text-center text-xs text-gray-300 mt-6">キューコミュ v1.0.0</p>
+      <p className="text-center text-xs text-gray-300 mt-2">キューコミュ v1.0.0</p>
 
       {/* サークル登録モーダル */}
       {showRegister && user && (

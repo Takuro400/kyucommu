@@ -2,16 +2,18 @@ import { Circle } from "@/lib/types";
 import { CATEGORY_MAP, formatFee } from "@/lib/utils";
 import Link from "next/link";
 import { Users } from "lucide-react";
+import CircleBookmarkButton from "./CircleBookmarkButton";
 
 interface Props {
   circle: Circle;
+  showBookmark?: boolean;
 }
 
-export default function CircleCard({ circle }: Props) {
+export default function CircleCard({ circle, showBookmark = true }: Props) {
   const cat = CATEGORY_MAP[circle.category];
   return (
-    <Link href={`/circle/${circle.id}`}>
-      <div className="bg-white rounded-xl p-4 flex items-center gap-3 active:opacity-70 transition-opacity">
+    <div className="bg-white rounded-xl flex items-center active:opacity-70 transition-opacity overflow-hidden">
+      <Link href={`/circle/${circle.id}`} className="flex items-center gap-3 flex-1 min-w-0 p-4">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
           style={{ background: cat.bg }}
@@ -37,11 +39,12 @@ export default function CircleCard({ circle }: Props) {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-1 text-gray-400 flex-shrink-0">
+        <div className="flex items-center gap-1 text-gray-400 flex-shrink-0 mr-1">
           <Users size={13} />
           <span className="text-xs">{circle.member_count}</span>
         </div>
-      </div>
-    </Link>
+      </Link>
+      {showBookmark && <CircleBookmarkButton circleId={circle.id} />}
+    </div>
   );
 }

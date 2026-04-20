@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, CalendarDays, User, MapPin } from "lucide-react";
+import { Home, Search, CalendarDays, User } from "lucide-react";
 
 const NAV = [
   { href: "/",         icon: Home,         label: "ホーム" },
   { href: "/search",   icon: Search,       label: "探す" },
-  { href: "/map",      icon: MapPin,       label: "マップ" },
   { href: "/calendar", icon: CalendarDays, label: "カレンダー" },
   { href: "/mypage",   icon: User,         label: "マイページ" },
 ];

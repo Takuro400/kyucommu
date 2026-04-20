@@ -106,6 +106,19 @@ create policy "circles_delete" on circles for delete using (auth.uid() = created
 -- profilesテーブルにアバターURLを追加
 alter table profiles add column if not exists avatar_url text;
 
+-- サークルブックマークテーブル
+create table if not exists circle_bookmarks (
+  id uuid default gen_random_uuid() primary key,
+  circle_id uuid references circles(id) on delete cascade,
+  user_id uuid not null,
+  created_at timestamptz default now(),
+  unique(circle_id, user_id)
+);
+alter table circle_bookmarks enable row level security;
+create policy "cbookmarks_read"   on circle_bookmarks for select using (auth.uid() = user_id);
+create policy "cbookmarks_insert" on circle_bookmarks for insert with check (auth.uid() = user_id);
+create policy "cbookmarks_delete" on circle_bookmarks for delete using (auth.uid() = user_id);
+
 -- サンプルデータ投入
 insert into circles (name, emoji, category, frequency, monthly_fee, beginner_ok, description, member_count, contact_handle) values
   ('ロボット研究会', '🤖', 'tech', '週2〜3回', 1000, true, '九工大の技術を活かしてロボットを自作！競技大会にも出場。プログラミング未経験でも大歓迎。', 28, 'robotics_kyutech'),
