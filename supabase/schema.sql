@@ -68,6 +68,19 @@ create policy "events_insert" on events for insert with check (true);
 create policy "likes_insert" on likes for insert with check (true);
 create policy "likes_delete" on likes for delete using (true);
 
+-- ブックマークテーブル
+create table if not exists bookmarks (
+  id uuid default gen_random_uuid() primary key,
+  post_id uuid references posts(id) on delete cascade,
+  user_id uuid not null,
+  created_at timestamptz default now(),
+  unique(post_id, user_id)
+);
+alter table bookmarks enable row level security;
+create policy "bookmarks_read"   on bookmarks for select using (auth.uid() = user_id);
+create policy "bookmarks_insert" on bookmarks for insert with check (auth.uid() = user_id);
+create policy "bookmarks_delete" on bookmarks for delete using (auth.uid() = user_id);
+
 -- プロフィールテーブル（表示名）
 create table if not exists profiles (
   id uuid default gen_random_uuid() primary key,

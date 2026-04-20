@@ -1,15 +1,10 @@
 import { Bell } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import StoryBar from "@/components/StoryBar";
-import PostCard from "@/components/PostCard";
-import { MOCK_CIRCLES, MOCK_POSTS } from "@/lib/mockData";
+import FeedClient from "@/components/FeedClient";
+import { MOCK_CIRCLES } from "@/lib/mockData";
 
 export default function HomePage() {
-  const postsWithCircle = MOCK_POSTS.map((p) => ({
-    post: p,
-    circle: MOCK_CIRCLES.find((c) => c.id === p.circle_id)!,
-  })).filter((x) => x.circle);
-
   return (
     <div className="pb-20">
       {/* トップバー */}
@@ -29,12 +24,8 @@ export default function HomePage() {
       {/* ストーリーバー */}
       <StoryBar circles={MOCK_CIRCLES} />
 
-      {/* フィード */}
-      <main>
-        {postsWithCircle.map(({ post, circle }) => (
-          <PostCard key={post.id} post={post} circle={circle} />
-        ))}
-      </main>
+      {/* フィード（いいね・ブックマーク状態をクライアントで管理） */}
+      <FeedClient />
 
       <BottomNav />
     </div>

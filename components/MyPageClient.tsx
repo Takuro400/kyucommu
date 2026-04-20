@@ -5,11 +5,11 @@ import { createClient, supabaseConfigured } from "@/lib/supabase";
 import { User, Bookmark, Bell, ChevronRight, LogOut, LogIn } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import Link from "next/link";
+import BookmarkedPostsClient from "./BookmarkedPostsClient";
 
 const DEMO_MODE = !supabaseConfigured;
 
 const MENU_ITEMS = [
-  { icon: Bookmark, label: "保存した投稿", sub: "ブックマーク一覧" },
   { icon: Bell, label: "通知設定", sub: "新着情報のお知らせ" },
 ];
 
@@ -110,6 +110,21 @@ export default function MyPageClient() {
             )}
           </div>
         </div>
+      </div>
+
+      {/* 保存した投稿 */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 px-1 mb-2">
+          <Bookmark size={15} style={{ color: "#185FA5" }} />
+          <p className="text-sm font-bold text-gray-800">保存した投稿</p>
+        </div>
+        {user ? (
+          <BookmarkedPostsClient userId={user.id} />
+        ) : (
+          <div className="bg-white rounded-2xl px-4 py-5 text-center">
+            <p className="text-xs text-gray-400">ログインすると保存した投稿が表示されます</p>
+          </div>
+        )}
       </div>
 
       {/* メニュー */}
