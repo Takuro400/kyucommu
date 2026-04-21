@@ -150,7 +150,7 @@ export default function MyPageClient() {
   if (loading) {
     return (
       <main className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 rounded-full border-2 border-[#185FA5] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-kpink border-t-transparent animate-spin" />
       </main>
     );
   }
@@ -158,17 +158,16 @@ export default function MyPageClient() {
   if (!user && !DEMO_MODE) {
     return (
       <main className="flex flex-col items-center justify-center py-20 px-8 text-center">
-        <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <LogIn size={36} className="text-gray-400" />
+        <div className="w-20 h-20 rounded-full gradient-soft flex items-center justify-center mb-4">
+          <LogIn size={32} className="text-kpink" />
         </div>
-        <p className="text-base font-medium text-gray-700 mb-2">ログインしていません</p>
-        <p className="text-sm text-gray-400 mb-6">
+        <p className="text-base font-semibold text-charcoal mb-2">ログインしていません</p>
+        <p className="text-sm text-muted mb-6 leading-relaxed">
           ログインすると、気になるサークルをブックマークしたり、サークルを登録できます。
         </p>
         <Link
           href="/login"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl text-white font-medium text-sm"
-          style={{ background: "#185FA5" }}
+          className="gradient-pink flex items-center gap-2 px-7 py-3 rounded-2xl text-white font-semibold text-sm shadow-pink tap-scale"
         >
           <LogIn size={16} />
           ログイン／新規登録
@@ -184,22 +183,24 @@ export default function MyPageClient() {
     ? (faculty ? FACULTY_DEPARTMENTS[faculty] ?? [] : [])
     : UPPER_DEPARTMENTS;
 
+  const selectClass = "w-full text-sm px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-charcoal focus:outline-none focus:border-kpink transition-colors";
+
   return (
-    <main className="px-4 py-5">
+    <main className="px-4 py-5 flex flex-col gap-4">
+
       {/* プロフィールカード */}
-      <div className="bg-white rounded-2xl p-5 mb-4">
-        <div className="flex items-center gap-4 mb-4">
+      <div className="card p-5">
+        <div className="flex items-center gap-4 mb-5">
           {user && !DEMO_MODE ? (
-            <AvatarUpload
-              userId={user.id}
-              avatarUrl={avatarUrl}
-              onUpload={(url) => setAvatarUrl(url)}
-            />
+            <div className="ring-2 ring-kpink ring-offset-2 rounded-full flex-shrink-0">
+              <AvatarUpload
+                userId={user.id}
+                avatarUrl={avatarUrl}
+                onUpload={(url) => setAvatarUrl(url)}
+              />
+            </div>
           ) : (
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-2xl flex-shrink-0"
-              style={{ background: "#E6F1FB" }}
-            >
+            <div className="w-16 h-16 rounded-full gradient-soft flex items-center justify-center text-2xl flex-shrink-0 ring-2 ring-kpink ring-offset-2">
               🎓
             </div>
           )}
@@ -213,66 +214,58 @@ export default function MyPageClient() {
                   onChange={(e) => setNameInput(e.target.value)}
                   maxLength={20}
                   autoFocus
-                  className="text-sm font-bold border border-[#185FA5] rounded-lg px-2 py-1 w-full focus:outline-none"
+                  className="text-sm font-bold border border-kpink rounded-xl px-2.5 py-1.5 w-full focus:outline-none"
                 />
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={saveDisplayName}
                     disabled={nameSaving}
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full text-white font-medium"
-                    style={{ background: "#185FA5" }}
+                    className="gradient-pink flex items-center gap-1 text-[11px] px-3 py-1 rounded-full text-white font-semibold tap-scale"
                   >
                     <Check size={11} />
                     {nameSaving ? "保存中..." : "保存"}
                   </button>
                   <button
                     onClick={cancelEditName}
-                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 font-medium"
+                    className="flex items-center gap-1 text-[11px] px-3 py-1 rounded-full bg-gray-100 text-muted font-semibold tap-scale"
                   >
                     <X size={11} />
                     キャンセル
                   </button>
                 </div>
-                {nameMsg && (
-                  <p className="text-[10px] text-red-500">{nameMsg}</p>
-                )}
+                {nameMsg && <p className="text-[10px] text-red-400">{nameMsg}</p>}
               </div>
             ) : (
               <>
                 <div className="flex items-center gap-1.5">
-                  <p className="text-base font-bold text-gray-900 truncate">{displayName}</p>
+                  <p className="text-base font-bold text-charcoal truncate">{displayName}</p>
                   {user && !DEMO_MODE && (
                     <button
                       onClick={() => startEditName(displayName)}
-                      className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 text-gray-400"
+                      className="flex-shrink-0 p-1 rounded-full hover:bg-gray-100 text-muted tap-scale"
                     >
                       <Pencil size={12} />
                     </button>
                   )}
                 </div>
-                {nameMsg && (
-                  <p className="text-[10px] text-green-600 mt-0.5">{nameMsg}</p>
-                )}
-                <p className="text-xs text-gray-400 truncate mt-0.5">{displayEmail}</p>
+                {nameMsg && <p className="text-[10px] text-green-500 mt-0.5">{nameMsg}</p>}
+                <p className="text-xs text-muted truncate mt-0.5">{displayEmail}</p>
                 <div className="flex items-center gap-1 mt-1.5 flex-wrap">
-                  <span
-                    className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: "#E6F1FB", color: "#185FA5" }}
-                  >
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-kpink-light text-kpink">
                     九工大生
                   </span>
                   {grade && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-gray-100 text-muted">
                       {grade}
                     </span>
                   )}
                   {department && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-gray-100 text-muted">
                       {department}
                     </span>
                   )}
                   {DEMO_MODE && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-amber-50 text-amber-600">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-terra-light text-terra">
                       デモ
                     </span>
                   )}
@@ -282,68 +275,46 @@ export default function MyPageClient() {
           </div>
         </div>
 
-        {/* 学年・学部・類の選択 */}
+        {/* 学年・学部・類 */}
         <div className="border-t border-gray-100 pt-4 flex flex-col gap-3">
-
-          {/* 学年 */}
           <div>
-            <label className="text-xs font-medium text-gray-500 mb-1 block">学年</label>
-            <select
-              value={grade}
-              onChange={(e) => handleGradeChange(e.target.value)}
-              disabled={DEMO_MODE}
-              className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5]"
-            >
+            <label className="text-xs font-semibold text-muted mb-1.5 block">学年</label>
+            <select value={grade} onChange={(e) => handleGradeChange(e.target.value)} disabled={DEMO_MODE} className={selectClass}>
               <option value="">未設定</option>
-              {GRADES.map((g) => (
-                <option key={g} value={g}>{g}</option>
-              ))}
+              {GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
             </select>
           </div>
 
-          {/* 学部（1年生のみ表示） */}
           {firstYear && (
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">学部</label>
-              <select
-                value={faculty}
-                onChange={(e) => handleFacultyChange(e.target.value)}
-                disabled={DEMO_MODE}
-                className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5]"
-              >
+              <label className="text-xs font-semibold text-muted mb-1.5 block">学部</label>
+              <select value={faculty} onChange={(e) => handleFacultyChange(e.target.value)} disabled={DEMO_MODE} className={selectClass}>
                 <option value="">未設定</option>
-                {Object.keys(FACULTY_DEPARTMENTS).map((f) => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
+                {Object.keys(FACULTY_DEPARTMENTS).map((f) => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
           )}
 
-          {/* 類（学年が選ばれていれば表示） */}
           {grade && (
             <div>
-              <label className="text-xs font-medium text-gray-500 mb-1 block">類</label>
+              <label className="text-xs font-semibold text-muted mb-1.5 block">類</label>
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
                 disabled={(firstYear && !faculty) || DEMO_MODE}
-                className="w-full text-sm px-3 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-800 focus:outline-none focus:border-[#185FA5] disabled:opacity-40"
+                className={selectClass + " disabled:opacity-40"}
               >
                 <option value="">未設定</option>
-                {deptOptions.map((d) => (
-                  <option key={d} value={d}>{d}</option>
-                ))}
+                {deptOptions.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
           )}
 
-          {/* 保存ボタン */}
           {user && !DEMO_MODE && (
             <button
               onClick={handleSaveProfile}
               disabled={saving}
-              className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-medium transition-opacity active:opacity-80"
-              style={{ background: "#185FA5" }}
+              className="gradient-pink flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-semibold tap-scale"
             >
               <Save size={14} />
               {saving ? "保存中..." : saveMsg ?? "保存する"}
@@ -354,90 +325,79 @@ export default function MyPageClient() {
 
       {/* 自分のサークル */}
       {user && (
-        <div className="mb-4">
-          <div className="flex items-center justify-between px-1 mb-2">
+        <div>
+          <div className="flex items-center justify-between px-1 mb-2.5">
             <div className="flex items-center gap-2">
-              <Users size={15} style={{ color: "#185FA5" }} />
-              <p className="text-sm font-bold text-gray-800">自分のサークル</p>
+              <Users size={15} className="text-kpink" />
+              <p className="text-sm font-bold text-charcoal">自分のサークル</p>
             </div>
             <button
               onClick={() => setShowRegister(true)}
-              className="flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-full"
-              style={{ background: "#E6F1FB", color: "#185FA5" }}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-kpink-light text-kpink tap-scale"
             >
               <PlusCircle size={13} />
               登録する
             </button>
           </div>
-          <div className="bg-white rounded-2xl px-3 py-3">
+          <div className="card px-3 py-3">
             <MyCirclesClient userId={user.id} refresh={circleRefresh} />
           </div>
         </div>
       )}
 
-      {/* ブックマークしたサークル */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 px-1 mb-2">
-          <Bookmark size={15} style={{ color: "#185FA5" }} />
-          <p className="text-sm font-bold text-gray-800">ブックマーク中のサークル</p>
+      {/* ブックマーク */}
+      <div>
+        <div className="flex items-center gap-2 px-1 mb-2.5">
+          <Bookmark size={15} className="text-kpink" />
+          <p className="text-sm font-bold text-charcoal">ブックマーク中のサークル</p>
         </div>
         {user || DEMO_MODE ? (
           <BookmarkedCirclesClient userId={user?.id ?? "demo"} />
         ) : (
-          <div className="bg-white rounded-2xl px-4 py-5 text-center">
-            <p className="text-xs text-gray-400">ログインするとブックマークが表示されます</p>
+          <div className="card px-4 py-5 text-center">
+            <p className="text-xs text-muted">ログインするとブックマークが表示されます</p>
           </div>
         )}
       </div>
 
-      {/* サークル登録 */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between px-1 mb-2">
-          <div className="flex items-center gap-2">
-            <Users size={15} style={{ color: "#185FA5" }} />
-            <p className="text-sm font-bold text-gray-800">サークル登録</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl p-4">
-          <p className="text-xs text-gray-500 mb-3">
-            あなたのサークル・部活をキューコミュに登録して、新入生にアピールしよう！
-          </p>
-          {(user || DEMO_MODE) ? (
-            <button
-              onClick={() => setShowRegister(true)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-medium text-sm"
-              style={{ background: "#185FA5" }}
-            >
-              <PlusCircle size={15} />
-              サークルを登録する
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-medium text-sm"
-              style={{ background: "#E6F1FB", color: "#185FA5" }}
-            >
-              <LogIn size={15} />
-              ログインして登録する
-            </Link>
-          )}
-        </div>
+      {/* サークル登録CTA */}
+      <div className="card p-4">
+        <p className="text-xs text-muted mb-3 leading-relaxed">
+          あなたのサークル・部活をキューコミュに登録して、新入生にアピールしよう！
+        </p>
+        {(user || DEMO_MODE) ? (
+          <button
+            onClick={() => setShowRegister(true)}
+            className="gradient-warm w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white font-semibold text-sm tap-scale"
+          >
+            <PlusCircle size={15} />
+            サークルを登録する
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm bg-kpink-light text-kpink tap-scale"
+          >
+            <LogIn size={15} />
+            ログインして登録する
+          </Link>
+        )}
       </div>
 
       {/* ログアウト */}
       {!DEMO_MODE && user && (
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-4 bg-white rounded-2xl active:bg-gray-50 text-red-400 mb-4"
+          className="card w-full flex items-center gap-3 px-4 py-4 tap-scale"
         >
           <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
             <LogOut size={16} className="text-red-400" />
           </div>
-          <span className="text-sm font-medium">ログアウト</span>
+          <span className="text-sm font-medium text-red-400">ログアウト</span>
         </button>
       )}
 
-      <p className="text-center text-xs text-gray-300 mt-2">キューコミュ v1.0.0</p>
+      <p className="text-center text-xs text-muted/50 pb-2">キューコミュ v1.0.0</p>
 
       {showRegister && user && (
         <RegisterCircleModal
