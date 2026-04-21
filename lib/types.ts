@@ -21,6 +21,10 @@ export interface Circle {
   created_at: string;
   status?: "pending" | "approved" | "rejected";
   reject_reason?: string;
+  location_x?: number;
+  location_y?: number;
+  location_name?: string;
+  is_active?: boolean;
 }
 
 export interface Post {

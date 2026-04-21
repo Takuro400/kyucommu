@@ -79,3 +79,13 @@ body {
   border-radius: 20px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.06);
 }
+
+/* 活動中炎アニメーション */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+.float-fire {
+  animation: float 2s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(248,113,113,0.4));
+}
