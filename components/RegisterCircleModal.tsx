@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { createClient, supabaseConfigured } from "@/lib/supabase";
+import { resizeImageToBase64 } from "@/lib/imageUtils";
 import { X, ChevronDown, Camera, MapPin } from "lucide-react";
 import { Circle, Category } from "@/lib/types";
 import { CATEGORY_MAP } from "@/lib/utils";
@@ -70,16 +71,13 @@ export default function RegisterCircleModal({ userId, onClose, onSuccess }: Prop
 
     let iconUrl: string | null = null;
 
-    if (iconFile && supabaseConfigured) {
-      const supabase = createClient();
-      const ext = iconFile.name.split(".").pop() ?? "jpg";
-      const path = `${userId}/${Date.now()}.${ext}`;
-      const { error: uploadErr } = await supabase.storage
-        .from("circle-icons")
-        .upload(path, iconFile, { upsert: true, contentType: iconFile.type });
-      if (!uploadErr) {
-        const { data } = supabase.storage.from("circle-icons").getPublicUrl(path);
-        iconUrl = data.publicUrl;
+    if (iconFile) {
+      try {
+        iconUrl = await resizeImageToBase64(iconFile);
+      } catch (err) {
+        setError("画像の処理に失敗しました。別の画像を選んでください。");
+        setLoading(false);
+        return;
       }
     }
 
