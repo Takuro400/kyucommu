@@ -9,7 +9,8 @@ import { CATEGORY_MAP } from "@/lib/utils";
 import { Category, Circle } from "@/lib/types";
 import { createClient, supabaseConfigured } from "@/lib/supabase";
 
-const CATS: { key: Category | "beginner"; label: string; emoji: string }[] = [
+const CATS: { key: Category | "beginner" | "active"; label: string; emoji: string }[] = [
+  { key: "active",   label: "活動中",    emoji: "🔥" },
   { key: "tech",     label: "技術系",    emoji: "💻" },
   { key: "sport",    label: "体育系",    emoji: "⚽" },
   { key: "culture",  label: "文化系",    emoji: "🎨" },
@@ -42,7 +43,9 @@ export default function SearchPage() {
       CATEGORY_MAP[c.category].label.includes(query);
     const matchFilter =
       !activeFilter ||
-      (activeFilter === "beginner" ? c.beginner_ok : c.category === activeFilter);
+      (activeFilter === "beginner" ? c.beginner_ok :
+       activeFilter === "active"   ? c.is_active :
+       c.category === activeFilter);
     return matchQuery && matchFilter;
   });
 
@@ -66,20 +69,32 @@ export default function SearchPage() {
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 mb-5">
             {CATS.map((cat) => {
               const isActive = activeFilter === cat.key;
-              const color = cat.key !== "beginner"
-                ? CATEGORY_MAP[cat.key as Category]
-                : { bg: "#EAF3DE", text: "#27500A" };
+              let bg = "#F3F4F6";
+              let textColor = "#6B7280";
+              let activeBg = "#374151";
+
+              if (cat.key === "active") {
+                bg = "#FEF2F2"; textColor = "#EF4444"; activeBg = "#EF4444";
+              } else if (cat.key === "beginner") {
+                bg = "#EAF3DE"; textColor = "#27500A"; activeBg = "#27500A";
+              } else {
+                const color = CATEGORY_MAP[cat.key as Category];
+                bg = color.bg; textColor = color.text; activeBg = color.text;
+              }
+
               return (
                 <button
                   key={cat.key}
                   onClick={() => setActiveFilter(isActive ? null : cat.key)}
                   className="flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 transition-all tap-scale"
                   style={{
-                    background: isActive ? color.text : color.bg,
-                    color: isActive ? "#fff" : color.text,
+                    background: isActive ? activeBg : bg,
+                    color: isActive ? "#fff" : textColor,
                   }}
                 >
-                  <span className="text-base">{cat.emoji}</span>
+                  <span className={`text-base ${cat.key === "active" && isActive ? "float-fire" : ""}`}>
+                    {cat.emoji}
+                  </span>
                   <span className="text-xs font-semibold">{cat.label}</span>
                 </button>
               );
@@ -94,9 +109,21 @@ export default function SearchPage() {
             ? `「${query}」の検索結果 (${filtered.length}件)`
             : `すべてのサークル (${filtered.length}件)`}
         </p>
+
         <div className="flex flex-col gap-2.5">
           {filtered.length > 0
-            ? filtered.map((c) => <CircleCard key={c.id} circle={c} />)
+            ? filtered.map((c) => (
+                <div key={c.id} className="relative">
+                  {c.is_active && (
+                    <div className="absolute -top-1.5 left-3 z-10">
+                      <span className="text-[10px] font-bold bg-red-500 text-white px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm">
+                        <span className="float-fire">🔥</span> 活動中
+                      </span>
+                    </div>
+                  )}
+                  <CircleCard circle={c} />
+                </div>
+              ))
             : <p className="text-center text-muted text-sm py-12">該当するサークルが見つかりませんでした</p>}
         </div>
       </main>

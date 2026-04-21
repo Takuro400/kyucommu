@@ -1,5 +1,6 @@
 import BottomNav from "@/components/BottomNav";
 import CircleCard from "@/components/CircleCard";
+import ActiveCirclesClient from "@/components/ActiveCirclesClient";
 import { MOCK_CIRCLES, MOCK_EVENTS } from "@/lib/mockData";
 import { CATEGORY_MAP } from "@/lib/utils";
 import { MapPin, Clock, ArrowRight, Sparkles } from "lucide-react";
@@ -44,6 +45,9 @@ export default function HomePage() {
           <div className="absolute -right-2 -bottom-4 w-20 h-20 rounded-full bg-lav/30" />
         </div>
 
+        {/* 今日活動中のサークル */}
+        <ActiveCirclesClient />
+
         {/* 近日開催の新歓 */}
         <section>
           <div className="flex items-center justify-between mb-3">
@@ -70,7 +74,6 @@ export default function HomePage() {
                 const cat = circle ? CATEGORY_MAP[circle.category] : null;
                 return (
                   <div key={ev.id} className="card flex-shrink-0 w-56 p-4 flex flex-col gap-2.5 tap-scale">
-                    {/* 日付＋カテゴリ */}
                     <div className="flex items-start justify-between">
                       <div className="gradient-soft rounded-xl px-2.5 py-2 text-center w-12">
                         <p className="text-lg font-bold leading-none text-kpink font-display">
