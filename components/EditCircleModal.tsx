@@ -128,8 +128,8 @@ export default function EditCircleModal({ circle, onClose, onSuccess }: Props) {
   const cat = CATEGORY_MAP[category];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-      <div className="bg-white w-full max-w-md rounded-t-3xl max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 pb-[70px]">
+      <div className="bg-white w-full max-w-md rounded-t-3xl flex flex-col" style={{ maxHeight: "calc(92vh - 70px)" }}>
         <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0 relative">
           <div className="w-10 h-1 bg-gray-200 rounded-full absolute left-1/2 -translate-x-1/2 top-3" />
           <p className="text-base font-bold text-charcoal">サークルを編集する</p>
@@ -138,7 +138,7 @@ export default function EditCircleModal({ circle, onClose, onSuccess }: Props) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-5 pb-6 flex flex-col gap-5">
+        <form id="edit-circle-form" onSubmit={handleSubmit} className="overflow-y-auto flex-1 px-5 pb-4 flex flex-col gap-5">
 
           {/* 今日活動中トグル */}
           <button
@@ -317,13 +317,21 @@ export default function EditCircleModal({ circle, onClose, onSuccess }: Props) {
 
           {error && <p className="text-xs text-red-400 bg-red-50 px-4 py-3 rounded-xl">{error}</p>}
 
-          <button type="submit" disabled={loading}
-            className="w-full py-4 rounded-2xl text-white font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 gradient-pink shadow-pink tap-scale">
+        </form>
+
+        {/* 固定フッター：ボトムナビと重ならない */}
+        <div className="px-5 py-4 border-t border-gray-100 flex-shrink-0 bg-white">
+          <button
+            type="submit"
+            form="edit-circle-form"
+            disabled={loading}
+            className="w-full py-4 rounded-2xl text-white font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 gradient-pink shadow-pink tap-scale"
+          >
             {loading
               ? <div className="w-5 h-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
               : "保存する"}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
