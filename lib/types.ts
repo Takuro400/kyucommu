@@ -19,6 +19,8 @@ export interface Circle {
   line_url?: string;
   created_by?: string;
   created_at: string;
+  status?: "pending" | "approved" | "rejected";
+  reject_reason?: string;
 }
 
 export interface Post {

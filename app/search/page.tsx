@@ -27,6 +27,7 @@ export default function SearchPage() {
     supabase
       .from("circles")
       .select("*")
+      .eq("status", "approved")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         if (data && data.length > 0) setCircles(data as Circle[]);
