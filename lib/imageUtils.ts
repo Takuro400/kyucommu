@@ -1,14 +1,11 @@
 /**
  * 画像ファイルをCanvas経由でリサイズし、base64 JPEG文字列として返す。
- * Supabase Storageなしでアイコンを保存できる。
- * @param file     元の画像ファイル
- * @param maxPx    長辺の最大ピクセル数（デフォルト 300px）
- * @param quality  JPEG品質 0〜1（デフォルト 0.82）
+ * Supabase Storageが使えない場合のフォールバック用。
  */
 export function resizeImageToBase64(
   file: File,
-  maxPx = 300,
-  quality = 0.82
+  maxPx = 600,
+  quality = 0.92
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -37,4 +34,33 @@ export function resizeImageToBase64(
 
     img.src = url;
   });
+}
+
+/**
+ * Supabase Storageへのアップロードを試み、失敗時はbase64にフォールバックする。
+ * @returns { url, warn } url=保存先URL, warn=Storageが使えなかった場合の警告文
+ */
+export async function uploadIcon(
+  file: File,
+  supabase: ReturnType<typeof import("@supabase/supabase-js").createClient>,
+  storagePath: string
+): Promise<{ url: string; warn?: string }> {
+  // Supabase Storage へアップロード試行
+  const { error: uploadErr } = await supabase.storage
+    .from("circle-icons")
+    .upload(storagePath, file, { upsert: true, contentType: file.type });
+
+  if (!uploadErr) {
+    const { data } = supabase.storage
+      .from("circle-icons")
+      .getPublicUrl(storagePath);
+    return { url: `${data.publicUrl}?t=${Date.now()}` };
+  }
+
+  // Storage が使えない場合 → 高画質 base64 にフォールバック
+  const base64 = await resizeImageToBase64(file, 600, 0.92);
+  return {
+    url: base64,
+    warn: "ストレージバケット未設定のため、圧縮画像で保存しました。Supabase Storageを設定すると原画質で保存できます。",
+  };
 }
